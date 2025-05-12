@@ -1,83 +1,108 @@
-# Member Get Member
-O Member Get Member é uma campanha criada pela equipe de Growth e desenvolvida em parceria com o time de Martech. O objetivo é incentivar a indicação da ClickBus por meio de cupons de desconto exclusivos.
+# Member Get Member  
 
-⚙️ Como funciona
-Indicação: Cada usuário recebe um link exclusivo para indicar a ClickBus a outras pessoas.
-Compra via link: Quando alguém usa o link de indicação para realizar uma compra, essa pessoa recebe um cupom de desconto.
-Recompensa para o indicador: Assim que a pessoa indicada finaliza sua viagem, o proprietário do link também recebe um cupom de desconto como recompensa.
-🎯 Benefícios
-✅ Todos ganham: Tanto quem indica quanto quem é indicado recebem descontos.
-✅ Incentivo à lealdade: A campanha promove fidelização e aumenta as chances de novas compras por meio de indicações orgânicas.
+O **Member Get Member** é uma campanha criada pela equipe de Growth e desenvolvida em parceria com o time de Martech. O objetivo é incentivar a indicação da ClickBus por meio de cupons de desconto exclusivos.  
 
-🚀 Tecnologias Utilizadas
-🔹 FastAPI
-FastAPI é um framework web moderno e de alta performance para construção de APIs com Python. Ele é baseado no ASGI (Asynchronous Server Gateway Interface), permitindo a criação de aplicações assíncronas de forma eficiente e intuitiva.
+# ⚙️ Como funciona  
 
-🔹 Apache Airflow
-O Apache Airflow é uma plataforma open-source para orquestração de workflows e pipelines de dados. Ele permite criar, agendar e monitorar fluxos de trabalho complexos, como ETLs e integrações entre sistemas, tudo programaticamente em Python.
+1. **Indicação:** Cada usuário recebe um link exclusivo para indicar a ClickBus a outras pessoas.  
+2. **Compra via link:** Quando alguém usa o link de indicação para realizar uma compra, essa pessoa recebe um cupom de desconto.  
+3. **Recompensa para o indicador:** Assim que a pessoa indicada finaliza sua viagem, o proprietário do link também recebe um cupom de desconto como recompensa.  
 
-🔹 Processos automatizados via Airflow:
+## 🎯 Benefícios  
 
-DAG - Criação de Promoters: mgm_set_promoters
-DAG - Criação de Voucher para Promoter: mgm_create_promoter_voucher
-🔗 Documentação: Airflow
-🔗 GitHub do Airflow: airflow-dags-k8s-developer
-📌 Caso não tenha acesso, solicitar ao time de Engenharia.
+✅ **Todos ganham:** Tanto quem indica quanto quem é indicado recebem descontos.  
+✅ **Incentivo à lealdade:** A campanha promove fidelização e aumenta as chances de novas compras por meio de indicações orgânicas.  
 
-🔹 Banco de Dados MySQL
-Utilizamos o MySQL como sistema de gerenciamento de banco de dados relacional (RDBMS) para armazenar e organizar as informações do projeto. Ele é confiável, amplamente utilizado no mercado e se integra muito bem com aplicações em Python.
+---
 
-Documentação oficial: https://dev.mysql.com/doc/
-🔧 Ambientes
+# 🚀 Tecnologias Utilizadas  
+
+## 🔹 FastAPI  
+FastAPI é um framework web moderno e de alta performance para construção de APIs com Python. Ele é baseado no ASGI (Asynchronous Server Gateway Interface), permitindo a criação de aplicações assíncronas de forma eficiente e intuitiva.  
+
+## 🔹 Apache Airflow  
+O **Apache Airflow** é uma plataforma open-source para orquestração de workflows e pipelines de dados. Ele permite criar, agendar e monitorar fluxos de trabalho complexos, como ETLs e integrações entre sistemas, tudo programaticamente em Python.  
+
+🔹 **Processos automatizados via Airflow:**  
+- **DAG - Criação de Promoters:** [mgm_set_promoters](https://airflowk8s.dev.data.clickbus.net/dags/mgm_set_promoters/grid?search=mgm_set_promoters)  
+- **DAG - Criação de Voucher para Promoter:** [mgm_create_promoter_voucher](https://airflowk8s.dev.data.clickbus.net/dags/mgm_create_promoter_voucher/grid?search=mgm_create_promoter_voucher)  
+
+🔗 **Documentação:** [Airflow](https://airflow.apache.org/docs/)  
+🔗 **GitHub do Airflow:** [airflow-dags-k8s-developer](https://github.com/RocketBus/airflow-dags-k8s-developer)  
+📌 *Caso não tenha acesso, solicitar ao time de Engenharia.*  
+
+## 🔹 Banco de Dados MySQL
+
+Utilizamos o **MySQL** como sistema de gerenciamento de banco de dados relacional (RDBMS) para armazenar e organizar as informações do projeto. Ele é confiável, amplamente utilizado no mercado e se integra muito bem com aplicações em Python.
+
+- Documentação oficial: [https://dev.mysql.com/doc/](https://dev.mysql.com/doc/)
+
+### 🔧 Ambientes
+
 Existem dois ambientes distintos, cada um com sua própria base de dados:
 
-dev – Banco utilizado localmente para testes e desenvolvimento.
-live – Banco utilizado em produção, com dados reais.
+- **`dev`** – Banco utilizado localmente para testes e desenvolvimento.
+- **`live`** – Banco utilizado em produção, com dados reais.
+
 Essa separação garante segurança, controle de qualidade e evita impactos não intencionais no ambiente de produção.
 
-▶️ Como rodar o projeto localmente
+### ▶️ Como rodar o projeto localmente
+
 Para executar o projeto em ambiente local com MySQL, siga os passos abaixo:
 
-Instale e inicie o MySQL localmente
+1. **Instale e inicie o MySQL localmente**  
+   - Você pode instalar o MySQL usando o [MySQL Installer](https://dev.mysql.com/downloads/installer/) ou rodar via Docker.
+   - Certifique-se de que o serviço do MySQL esteja ativo e acessível (por padrão na porta `3306`).
 
-Você pode instalar o MySQL usando o MySQL Installer ou rodar via Docker.
-Certifique-se de que o serviço do MySQL esteja ativo e acessível (por padrão na porta 3306).
-Crie o banco de dados local
+2. **Crie o banco de dados local**  
+   - Crie um banco de dados com o nome esperado pelo projeto, como por exemplo `martech_db`, ou conforme definido nas variáveis de ambiente.
 
-Crie um banco de dados com o nome esperado pelo projeto, como por exemplo martech_db, ou conforme definido nas variáveis de ambiente.
-Configure as variáveis de ambiente no .env
+3. **Configure as variáveis de ambiente no `.env`**  
+   - No ambiente de desenvolvimento, utilizamos a engine `mysql+aiomysql`, que permite integração assíncrona com o MySQL.
+     - `mysql` → especifica o tipo de banco.
+     - `aiomysql` → é o driver que habilita a comunicação assíncrona.
 
-No ambiente de desenvolvimento, utilizamos a engine mysql+aiomysql, que permite integração assíncrona com o MySQL.
-mysql → especifica o tipo de banco.
-aiomysql → é o driver que habilita a comunicação assíncrona.
-Exemplo de configuração da DATABASE_URL no arquivo .env:
+   Exemplo de configuração da `DATABASE_URL` no arquivo `.env`:
 
-DATABASE_URL_LOCAL=mysql+aiomysql://usuario:senha@localhost:3306/nome_do_banco
-Execute a aplicação
-Com tudo configurado, você pode rodar a aplicação localmente utilizando o gerenciador padrão do projeto (por exemplo uvicorn, docker-compose, etc.).
+   ```env
+   DATABASE_URL_LOCAL=mysql+aiomysql://usuario:senha@localhost:3306/nome_do_banco
+   ```
 
-🛠️ Sessões assíncronas com SQLAlchemy
-Para manter todas as APIs compatíveis com a abordagem async, utilizamos sessões assíncronas via AsyncSession do SQLAlchemy:
+4. **Execute a aplicação**  
+   Com tudo configurado, você pode rodar a aplicação localmente utilizando o gerenciador padrão do projeto (por exemplo `uvicorn`, `docker-compose`, etc.).
 
+### 🛠️ Sessões assíncronas com SQLAlchemy
+
+Para manter todas as APIs compatíveis com a abordagem `async`, utilizamos sessões assíncronas via `AsyncSession` do SQLAlchemy:
+
+```python
 from sqlmodel.ext.asyncio.session import AsyncSession
+```
 Essa estratégia melhora:
 
-✅ A performance em ambientes com múltiplas requisições concorrentes.
-✅ O consumo eficiente de recursos (threads/processos).
-✅ A escalabilidade da API, especialmente quando usada em produção com workers assíncronos como o Uvicorn.
-🛠 Como configurar as variáveis no código
-Para facilitar o gerenciamento de variáveis de ambiente, utilizamos uma função que retorna um dicionário (dict) onde:
+- ✅ A performance em ambientes com múltiplas requisições concorrentes.
+- ✅ O consumo eficiente de recursos (threads/processos).
+- ✅ A escalabilidade da API, especialmente quando usada em produção com workers assíncronos como o `Uvicorn`.
 
-A chave (key) é o nome da variável.
-O valor é o conteúdo da variável.
-A obtenção desses valores pode ocorrer de duas formas:
 
-Ambiente local: As variáveis são carregadas a partir de um arquivo .env.
-Produção: As variáveis devem ser previamente configuradas no AWS Secrets Manager.
-No arquivo app/config/settings.py, há uma variável do tipo List[str] chamada SECRET_KEYS, que contém os nomes das variáveis esperadas, tanto no .env quanto no AWS Secrets Manager. É importante que o nome das variáveis seja o mesmo em ambos os ambientes para garantir a compatibilidade.
+---
 
-A função fetch_secrets deve receber como parâmetro o tipo de ambiente em que está sendo executada, como dev ou prod. Dessa forma, ela pode coletar corretamente as variáveis de cada ambiente sem complicações. Abaixo está a função responsável por buscar os valores das variáveis conforme o ambiente:
+# **🛠 Como configurar as variáveis no código**  
 
+Para facilitar o gerenciamento de variáveis de ambiente, utilizamos uma função que retorna um dicionário (`dict`) onde:  
+- A **chave** (`key`) é o nome da variável.  
+- O **valor** é o conteúdo da variável.  
+
+A obtenção desses valores pode ocorrer de duas formas:  
+1. **Ambiente local**: As variáveis são carregadas a partir de um arquivo `.env`.  
+2. **Produção**: As variáveis devem ser previamente configuradas no **AWS Secrets Manager**.
+
+No arquivo `app/config/settings.py`, há uma variável do tipo `List[str]` chamada `SECRET_KEYS`, que contém os nomes das variáveis esperadas, tanto no `.env` quanto no **AWS Secrets Manager**. É importante que o nome das variáveis seja o mesmo em ambos os ambientes para garantir a compatibilidade.  
+
+A função `fetch_secrets` deve receber como parâmetro o tipo de ambiente em que está sendo executada, como `dev` ou `prod`. Dessa forma, ela pode coletar corretamente as variáveis de cada ambiente sem complicações.
+Abaixo está a função responsável por buscar os valores das variáveis conforme o ambiente:  
+
+```python
 from typing import List
 import os
 from secret_manager import SecretManager  # Classe para gerenciar secrets da AWS
@@ -149,4 +174,9 @@ def fetch_secrets(environments: str) -> dict:
 # Define o ambiente atual como 'prod'
 environment_secrets = fetch_secrets("prod")
 secrets.append(environment_secrets)
+
+```
+
 Esse código permite que, dependendo do ambiente, as variáveis sejam obtidas corretamente, garantindo flexibilidade e segurança no gerenciamento de credenciais. 🚀
+  
+---
