@@ -1,4 +1,4 @@
-Member Get Member
+# Member Get Member
 O Member Get Member é uma campanha criada pela equipe de Growth e desenvolvida em parceria com o time de Martech. O objetivo é incentivar a indicação da ClickBus por meio de cupons de desconto exclusivos.
 
 ⚙️ Como funciona
