@@ -36,7 +36,7 @@ async def create_promoter(
     
         async with session.begin():
             response = await set_member(member=member,is_promoter=True,session=session)
-        return response
+        return response.to_base64()
     
     except IntegrityError as e:
         MemberAlreadyExists(request=request,error_message=str(e.orig).lower(),notify_slack=True)

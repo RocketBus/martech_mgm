@@ -4,10 +4,11 @@ from app.config import settings
 from app.database.db import init_db
 
 
-# from app.member_get_member.v1.routes import routes as v1_member_get_member_members_route
-from app.users.routes import routes as user_route
 from app.member_get_member.v2.models.members import MGM_Members
 from app.member_get_member.v2.models.links import MGM_Links,MGM_ClickTracking
+from app.member_get_member.v2.models.vouchers import MGM_vouchers
+
+from app.users.routes import routes as user_route
 from app.member_get_member.v2.routes import (
     promoter as mgm_promoter
     )

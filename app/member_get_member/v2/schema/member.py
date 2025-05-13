@@ -42,10 +42,6 @@ class MembersResponse(MembersBase):
     
     def id_to_uuid(id: str) -> uuid.UUID:
         return uuid.UUID(id)
-    
-    
-    def encode_email_to_base64(email):
-        return encode_base64(email)
 
 
     def to_base64(self):

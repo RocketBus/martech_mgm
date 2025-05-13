@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 class VoucherMicroservice:
     def __init__(self) -> None:
         self.clickbus_url = 'https://voucher-microservice.clickbus.net'
-        self.environment = 'live'
+        self.environment = 'dev'
         self.headers={
                 'content-type': 'application/json',
                 } 

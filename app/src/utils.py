@@ -25,8 +25,8 @@ def datetime_now(fuso=False):
         return agora
 
 
-def encode_base64(input_str: str) -> str:
-    encoded_bytes = base64.b64encode(input_str.encode('utf-8'))
+def encode_base64(hash: str) -> str:
+    encoded_bytes = base64.b64encode(hash.encode('utf-8'))
     encoded_str = encoded_bytes.decode('utf-8')
     return encoded_str
 
