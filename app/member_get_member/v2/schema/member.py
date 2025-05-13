@@ -2,7 +2,7 @@ import uuid
 from enum import Enum
 from datetime import datetime
 from sqlmodel import SQLModel, Field
-
+from app.member_get_member.v2.schema.vouchers import VoucherBase
 from app.src.utils import encode_base64
 
 class InputType(str, Enum):
@@ -19,7 +19,7 @@ class CreateBase(SQLModel):
 
 
 class MembersBase(CreateBase):
-    is_promoter : bool
+    is_promoter : bool = False
     was_invited : bool = False
 
     
@@ -46,4 +46,13 @@ class MembersResponse(MembersBase):
 
     def to_base64(self):
         self.email = encode_base64(self.email)
+        return self
+
+class InvitedResponse(SQLModel):
+    invited:MembersResponse
+    voucher:VoucherBase
+    
+    def to_base64(self):
+        self.invited = self.invited.to_base64()
+        self.voucher = self.voucher.to_base64()
         return self

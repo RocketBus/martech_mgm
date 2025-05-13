@@ -3,12 +3,12 @@ import requests
 import requests
 from lxml import etree
 from bs4 import BeautifulSoup
-
+from app.config.settings import VOUCHER_ENVIRONMENT
 
 class VoucherMicroservice:
     def __init__(self) -> None:
         self.clickbus_url = 'https://voucher-microservice.clickbus.net'
-        self.environment = 'dev'
+        self.environment = VOUCHER_ENVIRONMENT
         self.headers={
                 'content-type': 'application/json',
                 } 

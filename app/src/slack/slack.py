@@ -14,7 +14,7 @@ class SlackAlerts:
     client = WebClient(token=oauthToken)
     logger = logging.getLogger(__name__)
 
-    async def alert_msg(self,msg : str, channel_id : str, app : str):
+    def alert_msg(self,msg : str, channel_id : str, app : str):
         try:
             # Call the conversations.list method using the WebClient
             result = self.client.chat_postMessage(
