@@ -34,6 +34,12 @@ async def login(user: UserLogin, request: Request, response: Response, session: 
             httponly=True,
             secure=True if ENVIRONMENT_LOCAL == 'prod' else False
         )
+        response.set_cookie(
+            key='r_mgm',
+            value=refresh_token,
+            httponly=True,
+            secure=True if ENVIRONMENT_LOCAL == 'prod' else False
+        )
 
         return TokenResponse(access_token=access_token,refresh_token=refresh_token)
 

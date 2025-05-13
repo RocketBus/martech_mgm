@@ -3,10 +3,11 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.auth.auth_handler import decode_jwt
 
 class JWTBearer(HTTPBearer):
-    def __init__(self, token_types: list[str] = ["access"], cookie_name: str = "a_mgm", auto_error: bool = True):
+    def __init__(self, token_types: list[str] = ["access"], auto_error: bool = True):
         super().__init__(auto_error=auto_error)
         self.token_types = token_types
-        self.cookie_name = cookie_name
+        self.acces_cookie_name = 'a_mgm'
+        self.refresh_cookie_name = 'r_mgm'
 
     async def __call__(self, request: Request):
         token = None
@@ -21,7 +22,7 @@ class JWTBearer(HTTPBearer):
 
         # 2. Se não houver token no header, tenta buscar no cookie
         if not token:
-            token = request.cookies.get(self.cookie_name)
+            token = request.cookies.get(self.acces_cookie_name) or request.cookies.get(self.refresh_cookie_name)
 
         # 3. Se ainda assim não tiver token, erro
         if not token:
