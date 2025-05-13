@@ -7,6 +7,7 @@ from app.database.db import init_db
 # from app.member_get_member.v1.routes import routes as v1_member_get_member_members_route
 from app.users.routes import routes as user_route
 from app.member_get_member.v2.models.members import MGM_Members
+from app.member_get_member.v2.models.links import MGM_Links,MGM_ClickTracking
 from app.member_get_member.v2.routes import (
     promoter as mgm_promoter
     )
@@ -35,7 +36,7 @@ app.add_middleware(
 async def on_startup():
     await init_db()
 
-mgm_prefix = "/v2/mgm"
+mgm_prefix = "/v2"
 
 app.include_router(user_route.router, prefix="/admin")
 app.include_router(mgm_promoter.router, prefix=mgm_prefix)

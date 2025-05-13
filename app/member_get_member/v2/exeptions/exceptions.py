@@ -1,15 +1,15 @@
 from app.config.settings import environment_secrets,ENVIRONMENT_LOCAL
-from app.services.slack.slack import SlackAlerts
+from app.src.slack.slack import SlackAlerts
 from fastapi import HTTPException, status, Request
 import asyncio
 
 class MemberGetMemberException(Exception):
-    def __init__(self, message:str,request:Request=False):
+    def __init__(self, message:str,request:Request=False,status_code:int=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(message)
         self.slack = SlackAlerts()
         self.message = message
+        self.status_code = status_code
         self.request = request
-        self.main()
 
     async def execute_additional_code(self):
         endpoint = str(self.request.url)
@@ -24,7 +24,7 @@ class MemberGetMemberException(Exception):
             app="Member get member"
         )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=self.status_code,
             detail=self.message
         )
 
@@ -32,10 +32,29 @@ class MemberGetMemberException(Exception):
         # Executa a corrotina em segundo plano
         asyncio.create_task(self.execute_additional_code())
 
-class MemberGetMemberUserDoesExists(HTTPException):
-    def __init__(self, status_code, detail = None, headers = None):
-        super().__init__(status_code, detail, headers)
+class MemberAlreadyExists(MemberGetMemberException):
+    def __init__(self,error_message:str, request:Request=False,notify_slack:bool=False):
+        super().__init__(
+            message="Member already exists",
+            request=request,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+        self.duplicated_errors = ['duplicate key', 'unique constraint', 'duplicate entry']
+        self.error_message = error_message
+        self.notify_slack = notify_slack
+        self.init()
+    
+    async def additional_code(self):
 
-class MemberGetMemberInvitedExist(HTTPException):
-    def __init__(self, status_code, detail = None, headers = None):
-        super().__init__(status_code, detail, headers)
+        if any(self.error_message.find(keyword) != -1 for keyword in self.duplicated_errors):
+            if self.notify_slack:
+                self.main()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Duplicated entry detected."
+            )
+    
+    
+    def init(self):
+        # Executa a corrotina em segundo plano
+        asyncio.create_task(self.additional_code())

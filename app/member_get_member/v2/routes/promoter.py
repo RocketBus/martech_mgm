@@ -1,16 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 import uuid
 import asyncio
 from typing import List
 
-from app.member_get_member.v2.schema.member import CreateBase,MembersResponse,MembersBase
-from app.member_get_member.v2.models.members import MGM_Members
-from app.database.db import get_session
+from app.member_get_member.v2.schema.member import CreateBase,MembersResponse
+from app.member_get_member.v2.exeptions.exceptions import MemberAlreadyExists,MemberGetMemberException
 from app.auth.auth_bearer import JWTBearer
-
 from app.src.database import crud
+from app.member_get_member.v2.crud.members import set_member
+from app.database.db import get_session
 
 router = APIRouter()
 
@@ -31,19 +32,15 @@ async def create_promoter(
     request: Request,
     session: AsyncSession = Depends(get_session)
 ):
-    search = await crud.search_value(
-        model=MGM_Members,
-        value=member.user_id,
-        column_name="user_id",
-        session=session,
+    try:
+    
+        async with session.begin():
+            response = await set_member(member=member,is_promoter=True,session=session)
+        return response
+    
+    except IntegrityError as e:
+        MemberAlreadyExists(request=request,error_message=str(e.orig).lower(),notify_slack=True)
         
-    )
+    except Exception as e:
+        MemberGetMemberException(request=request, message=str(e))
     
-    if search:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User already exists."
-        )
-    
-    schema = MembersBase(**member.dict(),is_promoter=True)
-    pass
