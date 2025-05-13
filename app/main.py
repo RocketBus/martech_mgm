@@ -1,0 +1,41 @@
+from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from app.config import settings
+from app.database.db import init_db
+
+
+# from app.member_get_member.v1.routes import routes as v1_member_get_member_members_route
+from app.users.routes import routes as user_route
+from app.member_get_member.v2.models.members import MGM_Members
+from app.member_get_member.v2.routes import (
+    promoter as mgm_promoter
+    )
+
+origins = [
+    "https://www.clickbus.com.br"
+]
+
+app = FastAPI(
+    title=settings.title,
+    summary=settings.summary,
+    description=settings.description,
+    version=settings.VERSION,
+   
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Lista de origens permitidas
+    allow_credentials=True,
+    allow_methods=["*"],  # Permite todos os métodos (GET, POST, etc.)
+    allow_headers=["*"],  # Permite todos os cabeçalhos
+)
+
+
+@app.on_event("startup")
+async def on_startup():
+    await init_db()
+
+mgm_prefix = "/v2/mgm"
+
+app.include_router(user_route.router, prefix="/admin")
+app.include_router(mgm_promoter.router, prefix=mgm_prefix)
