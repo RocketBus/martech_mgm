@@ -23,13 +23,14 @@ router_configs = {
 # Prefixo padrão para identificação dos endpoints no Swagger
 tag_prefix = "[ Member get member ]"
 
+
 @router.post(
     "/link/click/{promoter_id}",
     response_model=MGM_ClickTracking,
     tags=[f"{tag_prefix} tracking"],
     **router_configs
 )
-async def create_promoter(
+async def set_click(
     promoter_id: uuid.UUID,
     request: Request,
     session: AsyncSession = Depends(get_session)
@@ -65,13 +66,14 @@ async def create_promoter(
                 message=str(e)
             )
 
+
 @router.get(
     "/link/count/{promoter_id}",
     response_model=LinkCountResponse,
     tags=[f"{tag_prefix} tracking"],
     **router_configs
 )
-async def create_promoter(
+async def get_link_count(
     promoter_id: uuid.UUID,
     request: Request,
     session: AsyncSession = Depends(get_session)
