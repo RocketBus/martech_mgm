@@ -1,26 +1,26 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
+
 from app.database.db import get_session
-from fastapi import status
 from app.auth.auth_bearer import JWTBearer
 from app.src.clickbus.clickbus import Orders
 from app.member_get_member.v2.crud.purchase import create_purchase
 from app.member_get_member.v2.crud.invitations import set_stage
 from app.member_get_member.v2.crud.promoter import get_promoter_link_id_by_promoter_id
 from app.member_get_member.v2.models.purchase import MGM_Purchases
-from app.member_get_member.v2.schema.purchase import CreatePurchase, PurchaseBase
-from app.member_get_member.v2.exeptions.exceptions import MemberAlreadyExists, MemberGetMemberException
+from app.member_get_member.v2.schema.purchase import CreatePurchase
+from app.member_get_member.v2.exeptions.exceptions import MemberGetMemberException
 
 # Inicializa o roteador da aplicação
 router = APIRouter()
 
-# Configura dependências comuns a todos os endpoints do router
+# Define as dependências padrão para todos os endpoints deste roteador
 router_configs = {
     "dependencies": [Depends(JWTBearer(token_types=["access", "refresh"]))]
 }
 
-# Prefixo padrão para identificação dos endpoints no Swagger
+# Prefixo utilizado na documentação Swagger para agrupar os endpoints
 tag_prefix = "[ Member get member ]"
 
 @router.post(
@@ -31,47 +31,66 @@ tag_prefix = "[ Member get member ]"
 )
 async def purchase(
     purchase: CreatePurchase,
-    promoter_id : uuid.UUID ,
+    promoter_id: uuid.UUID,
     request: Request,
     session: AsyncSession = Depends(get_session),
-    clickbus_orders:Orders = Depends(Orders),
+    clickbus_orders: Orders = Depends(Orders),
 ):
+    """
+    Endpoint responsável por registrar uma compra associada a um promotor.
+
+    Parâmetros:
+    - purchase (CreatePurchase): Vincular order_id de um pedido a uma compra feita pelo convidado de um promotor.
+    - promoter_id (uuid.UUID): Identificador do promotor responsável pela indicação.
+    - request (Request): Objeto de requisição HTTP do FastAPI.
+    - session (AsyncSession): Sessão de banco de dados assíncrona.
+    - clickbus_orders (Orders): Serviço externo da ClickBus para busca de pedidos(order).
+
+    Retorna:
+    - Um objeto `MGM_Purchases` representando a compra registrada.
+    """
+
     try:
+        # Inicia uma transação assíncrona no banco de dados (Respeitar atomicidade)
         async with session.begin():
             
-            order = await  clickbus_orders.get_order(purchase.order_id)
-            
+            # Busca os detalhes do pedido no serviço externo da ClickBus
+            order = await clickbus_orders.get_order(purchase.order_id)
             order_response = order.json()
-            
+
+            # Obtém a data de embarque com base na resposta do pedido
             departure_time = await clickbus_orders.get_departure_date(
                 order_response=order_response
             )
-            
+
+            # Registra a compra no banco de dados com os dados coletados
             purchase_schema = await create_purchase(
                 purchase=purchase,
                 session=session,
                 departure_time=departure_time,
                 promoter_id=promoter_id
             )
-            
+
+            # Obtém o ID do link do promotor (usado para rastreamento)
             promoter_link_id = await get_promoter_link_id_by_promoter_id(
                 promoter_id=promoter_id,
                 session=session,
                 request=request
             )
-            
+
+            # Atualiza o estágio do convidado para "purchase_approved"
             await set_stage(
                 invited_id=purchase.invited_id,
                 promoter_link_id=promoter_link_id,
                 stage="purchase_approved",
                 session=session
             )
-        
-            response = purchase_schema
-            return response 
+
+            # Retorna o schema da compra registrada
+            return purchase_schema
     
-    # Tratamento genérico para outros tipos de exceção
     except Exception as e:
+        # Lança exceção customizada com a mensagem do erro capturado
         MemberGetMemberException(
             request=request,
             message=str(e)
