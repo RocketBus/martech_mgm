@@ -4,8 +4,6 @@ from app.src.aws.secrete_manager import SecretManager
 
 ENVIRONMENT_LOCAL = 'dev' # alterar p/ prod quado fizer commit
 
-VOUCHER_ENVIRONMENT = 'live'# live or dev
-
 SECRET_KEYS = [
     "JWT_SECRET",
     "JWT_ALGORITHM",
@@ -18,7 +16,8 @@ SECRET_KEYS = [
     "ALPHABET",
     "SLACK_OAUTH_TOKEN",
     "MARTECH_ALERT_CHANNEL_ID",
-    
+    "ROOTUSERNAME",
+    "ROOTPASSWORD",
 ]
 
 secrets = []
