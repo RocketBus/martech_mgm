@@ -1,7 +1,11 @@
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import status
+from sqlmodel import select, and_, update
+import uuid
+
 from app.member_get_member.v2.models.members import MGM_Members
+from app.member_get_member.v2.models.links import MGM_Links
 from app.member_get_member.v2.exeptions.exceptions import MemberGetMemberException
 from app.member_get_member.v2.schema.member import (
     MemberLinkResponse,
@@ -9,6 +13,22 @@ from app.member_get_member.v2.schema.member import (
     )
 from app.member_get_member.v2.crud.links import get_link_schema_by_member_id
 from app.src.database import crud
+
+
+async def get_promoter_link_id_by_promoter_id(promoter_id:uuid.UUID,session:AsyncSession,request:Request)->MGM_Members:
+    promoter_link = await crud.search_value(
+        model=MGM_Links,
+        value=promoter_id,
+        column_name="member_id",
+        session=session
+    )
+    if not promoter_link:
+        MemberGetMemberException(
+            request=request,
+            message="Promoter_id not found",
+            status_code=404
+        )
+    return promoter_link[0].id
 
 
 async def get_member(value:str,column_name:str,session:AsyncSession,request:Request)->MGM_Members:
