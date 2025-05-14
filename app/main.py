@@ -13,7 +13,8 @@ from app.users.routes import routes as user_route
 from app.member_get_member.v2.routes import (
     promoter as mgm_promoter,
     invited as mgm_invited,
-    members as mgm_members
+    members as mgm_members,
+    link as mgm_link
     )
 
 origins = [
@@ -46,3 +47,4 @@ app.include_router(user_route.router, prefix="/admin")
 app.include_router(mgm_promoter.router, prefix=mgm_prefix)
 app.include_router(mgm_members.router, prefix=mgm_prefix)
 app.include_router(mgm_invited.router, prefix=mgm_prefix)
+app.include_router(mgm_link.router, prefix=mgm_prefix)

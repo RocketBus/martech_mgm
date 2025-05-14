@@ -83,7 +83,7 @@ Em caso de erro de integridade (por exemplo, se o member já existir), uma exce�
             if not promoter_link:
                 MemberGetMemberException(
                     request=request,
-                    message="Promoter not found",
+                    message="Promoter_id not found",
                     status_code=404
                 )
             # Criação do membro (não é um promotor neste contexto)

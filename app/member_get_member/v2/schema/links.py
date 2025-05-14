@@ -8,4 +8,3 @@ class LinkCountResponse(SQLModel):
 class LinkIdResponse(SQLModel):
     link_id : str
     url : str
-    
