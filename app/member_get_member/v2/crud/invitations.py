@@ -69,6 +69,7 @@ async def set_stage(
             link_id=promoter_link_id
         )
         session.add(schema)
+        await session.flush()  # Garante que o ID e outros valores sejam atualizados
         return schema
 
     except Exception as e:

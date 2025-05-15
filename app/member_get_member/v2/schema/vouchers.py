@@ -1,13 +1,11 @@
 from sqlmodel import SQLModel, Field
-from datetime import datetime
 import uuid
-from enum import Enum
 from typing import List
 from app.src.clickbus.cupons import VoucherMicroservice
 from app.config.settings import environment_secrets,ENVIRONMENT_LOCAL
 from app.src.utils import generate_token,future_date,datetime_now,encode_base64
 from fastapi import HTTPException, status
-import base64
+
 
 def mgm_code_renerator():
     code = generate_token(7).upper()
@@ -18,9 +16,11 @@ def set_start_at():
     now = datetime_now(True)
     return now.strftime("%Y-%m-%d %H:%M:%S")
 
+
 def set_end_at():
     end = future_date(5)
     return end.strftime("%Y-%m-%d %H:%M:%S")
+
     
 class VoucherBase(SQLModel):
     voucher_id: str
@@ -28,10 +28,12 @@ class VoucherBase(SQLModel):
     end_at: str
 
     def to_base64(self):
-        self.voucher_id = encode_base64(self.voucher_id)
-        self.code = encode_base64(self.code)
-        
-        return self
+        """Retorna uma nova instância com os campos codificados em base64."""
+        return self.__class__(
+            voucher_id=encode_base64(self.voucher_id),
+            code=encode_base64(self.code),
+            end_at=self.end_at
+        )
 
 class VoucherEmail(SQLModel):
     email : str
@@ -39,7 +41,7 @@ class VoucherEmail(SQLModel):
 
 
 class Voucher(SQLModel):
-    voucher_id : str = None
+    voucher_id : str = "e5ddcb30-a215-4100-824f-a7814c2469c4"
     discount_id: str = environment_secrets['MGM_DISCOUNT_ID_INVITED']
     code: str = Field(default_factory=mgm_code_renerator)
     campaign_name: str = environment_secrets['MGM_VOUCHER_CAMPAIGN_INDICADO']
@@ -53,7 +55,8 @@ class Voucher(SQLModel):
     origin:str =  "8"
     email: List[VoucherEmail] = Field(default_factory=list)
 
-    def create(self,is_promoter:bool,email:str):
+
+    def create(self,is_promoter:bool,email:str) ->VoucherBase:
         if is_promoter:
             self.campaign_name = environment_secrets['MGM_VOUCHER_CAMPAIGN_PROMOTOR']
             self.discount_id = environment_secrets['MGM_DISCOUNT_ID_PROMOTER']

@@ -13,7 +13,7 @@ from app.member_get_member.v2.crud.vouchers import set_voucher
 from app.member_get_member.v2.crud.invitations import set_stage
 from app.member_get_member.v2.crud.promoter import get_promoter_link_id_by_promoter_id
 from app.member_get_member.v2.exeptions.exceptions import MemberAlreadyExists, MemberGetMemberException
-from app.config.settings import ENVIRONMENT_LOCAL
+from app.config.settings import ENVIRONMENT_LOCAL,VOUCHER_MOCK
 
 # Criação do roteador da API
 router = APIRouter()
@@ -70,27 +70,9 @@ Em caso de erro de integridade (por exemplo, se o member já existir), uma exce�
             promoter_link_id = await get_promoter_link_id_by_promoter_id(promoter_id=promoter_id,session=session,request=request)
             # Criação do membro (não é um promotor neste contexto)
             member_schema = await set_member(member=member, is_promoter=False, session=session)
-            await session.flush()  # Garante que o ID e outros valores sejam atualizados
             
-            # mock para ambiente de desenvolvimento
-            if ENVIRONMENT_LOCAL == "dev":
-                voucher_data = {
-                    "voucher_id": "e5ddcb30-a215-4100-824f-a7814c2469c4",
-                    "code": "mgm_mock_app",
-                    "end_at": "2025-12-31T23:59:59"
-                }
-            
-            if ENVIRONMENT_LOCAL == "prod":    
-                # Geração do voucher associado ao membro
-                voucher_response = await set_voucher(member=member_schema, session=session)
-                await session.flush()  # Garante que o ID e outros valores sejam atualizados
-                
-                voucher_data = {
-                    "voucher_id": voucher_response.voucher_id,
-                    "code": voucher_response.code,
-                    "end_at": voucher_response.end_at
-                }
-                
+            # Geração do voucher associado ao membro
+            voucher_response = await set_voucher(member=member_schema, session=session)
             # Registro do estágio atual do membro convidado
             await set_stage(
                 invited_id=member_schema.id,
@@ -99,13 +81,9 @@ Em caso de erro de integridade (por exemplo, se o member já existir), uma exce�
                 session=session
             )
             
-            voucher_schema = VoucherBase(
-                **voucher_data
-            )
-            
             response = InvitedResponse(
                 invited=member_schema.to_base64(),
-                voucher=voucher_schema.to_base64()
+                voucher=voucher_response.to_base64()
             )
 
             # Retorno dos dados do membro em formato codificado

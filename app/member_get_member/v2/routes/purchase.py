@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends, Request, status
-from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, Request, status, HTTPException
 
 from app.database.db import get_session
 from app.auth.auth_bearer import JWTBearer
 from app.src.clickbus.clickbus import Orders
-from app.member_get_member.v2.crud.purchase import create_purchase
+from app.src.scheduler.scheduler import ActionScheduler
+
 from app.member_get_member.v2.crud.invitations import set_stage
+from app.member_get_member.v2.crud.purchase import create_purchase,get_orders_departured
 from app.member_get_member.v2.crud.promoter import get_promoter_link_id_by_promoter_id
 from app.member_get_member.v2.models.purchase import MGM_Purchases
 from app.member_get_member.v2.schema.purchase import CreatePurchase
@@ -95,3 +97,31 @@ async def purchase(
             request=request,
             message=str(e)
         )
+
+
+
+@router.get("/departured/voucher/", **router_configs,tags=[f"{tag_prefix} create"])
+async def departure_vucher(
+    request : Request,
+    session : AsyncSession = Depends(get_session),
+):
+    try:
+        e = None
+        orders =  await get_orders_departured(session=session)
+        if not orders:
+            return HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail='No orders found.'
+            )
+        scheduler = ActionScheduler()
+        scheduler.activate()
+        await scheduler.addJob(
+            'mgm_departure_invited',{'orders':orders,'session':session,'request':request}
+        )
+        return HTTPException(
+            status_code=200,
+            detail="Processo iniado"
+        )
+    except (Exception) as e:
+        MemberGetMemberException(message=str(e),request=request)
+   

@@ -41,6 +41,7 @@ async def set_member(member:CreateBase,is_promoter: bool,session:AsyncSession)->
     
     link_schema = await create_link(member=mgm_member,session=session)
     session.add(link_schema)
+    await session.flush()  # Garante que o ID e outros valores sejam atualizados
    
     link_response = MemberLinkResponse(
         link_id=link_schema.id,
