@@ -22,7 +22,8 @@ from app.member_get_member.v2.routes import (
     invited as mgm_invited,
     members as mgm_members,
     link as mgm_link,
-    purchase as mgm_purchase
+    purchase as mgm_purchase,
+    reports as mgm_reports
 )
 
 # Origens permitidas para CORS
@@ -91,4 +92,5 @@ app.include_router(mgm_promoter.router, prefix=mgm_prefix)
 app.include_router(mgm_members.router, prefix=mgm_prefix)
 app.include_router(mgm_purchase.router, prefix=mgm_prefix)
 app.include_router(mgm_invited.router, prefix=mgm_prefix)
+app.include_router(mgm_reports.router, prefix=mgm_prefix)
 app.include_router(mgm_link.router, prefix=mgm_prefix)
