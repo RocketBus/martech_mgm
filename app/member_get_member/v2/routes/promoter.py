@@ -11,7 +11,7 @@ from app.member_get_member.v2.schema.member import (
     CreateBase,
     MembersResponse
     )
-from app.src.database import crud
+from app.src.utils import decode_base64
 from app.member_get_member.v2.models.members import MGM_Members
 from app.member_get_member.v2.schema.vouchers import VoucherBase
 from app.member_get_member.v2.exeptions.exceptions import MemberAlreadyExists, MemberGetMemberException
@@ -62,6 +62,9 @@ async def create_promoter(
     try:
         # Inicia a transação assíncrona para persistir os dados do promotor
         async with session.begin():
+            member_email = member.email
+            decode_email = decode_base64(member_email)
+            member.email = decode_email
             response = await set_member(member=member, is_promoter=True, session=session)
 
         # Retorna a resposta formatada (codificada em base64)
