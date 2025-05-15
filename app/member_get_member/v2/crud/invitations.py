@@ -1,12 +1,13 @@
 from app.member_get_member.v2.models.invitations import MGM_Invitations
 from app.member_get_member.v2.schema.invitations import StageCount, InputType
+from app.member_get_member.v2.schema.report import ReportBase
 
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select 
 from sqlalchemy import func
 
-async def count_stages(link_id: uuid.UUID, session: AsyncSession) -> dict:
+async def count_stages(link_id: uuid.UUID, session: AsyncSession) -> ReportBase:
     """
     Conta a quantidade de membros por estágio com base no `link_id` do promotor.
 
@@ -35,7 +36,7 @@ async def count_stages(link_id: uuid.UUID, session: AsyncSession) -> dict:
     for stage in InputType:
         counts.setdefault(stage.value, 0)
 
-    return counts
+    return ReportBase(**counts)
 
 
 async def set_stage(
@@ -69,6 +70,7 @@ async def set_stage(
             link_id=promoter_link_id
         )
         session.add(schema)
+        await session.flush()  # Garante que o ID e outros valores sejam atualizados
         return schema
 
     except Exception as e:

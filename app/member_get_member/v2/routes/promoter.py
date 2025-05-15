@@ -1,17 +1,20 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-
+from typing import List
 from app.database.db import get_session
 
 from app.auth.auth_bearer import JWTBearer
 from app.member_get_member.v2.crud.members import set_member
+from app.member_get_member.v2.crud.promoter import get_vouchers_by_member_id
 from app.member_get_member.v2.schema.member import (
     CreateBase,
     MembersResponse
     )
+from app.src.database import crud
+from app.member_get_member.v2.models.members import MGM_Members
+from app.member_get_member.v2.schema.vouchers import VoucherBase
 from app.member_get_member.v2.exeptions.exceptions import MemberAlreadyExists, MemberGetMemberException
-from app.member_get_member.v2.crud.promoter import get_member
 
 
 # Inicializa o roteador da aplicação
@@ -71,3 +74,32 @@ async def create_promoter(
     except Exception as e:
         # Trata exceções genéricas, com logging e rastreamento
         MemberGetMemberException(request=request, message=str(e))
+
+
+@router.get(
+    "/member/vouchers/email/{email}",
+    response_model=List[VoucherBase],
+    tags=[f"{tag_prefix} information by"],
+    **router_configs
+)
+async def get_vouchers_by_email(
+    email : str,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    vouchers = await get_vouchers_by_member_id(value=email,column_name='email', session=session, request=request)
+    return vouchers
+
+@router.get(
+    "/member/vouchers/user_id/{user_id}",
+    response_model=List[VoucherBase],
+    tags=[f"{tag_prefix} information by"],
+    **router_configs
+)
+async def get_vouchers_by_user_id(
+    user_id : str,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    vouchers = await get_vouchers_by_member_id(value=user_id,column_name='user_id', session=session, request=request)
+    return vouchers

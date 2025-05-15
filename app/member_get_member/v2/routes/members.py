@@ -24,7 +24,7 @@ tag_prefix = "[ Member get member ]"
 @router.get(
     "/member/email/{email}",
     response_model=MembersResponse,
-    tags=[f"{tag_prefix} get"],
+    tags=[f"{tag_prefix} information by"],
     **router_configs
 )
 async def get_promoter_by_email(
@@ -38,7 +38,7 @@ async def get_promoter_by_email(
 @router.get(
     "/member/user_id/{user_id}",
     response_model=MembersResponse,
-    tags=[f"{tag_prefix} get"],
+    tags=[f"{tag_prefix} information by"],
     **router_configs
 )
 async def get_promoter_by_user_id(

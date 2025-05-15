@@ -70,7 +70,7 @@ async def set_click(
 @router.get(
     "/link/count/{promoter_id}",
     response_model=LinkCountResponse,
-    tags=[f"{tag_prefix} tracking"],
+    tags=[f"{tag_prefix} report"],
     **router_configs
 )
 async def get_link_count(

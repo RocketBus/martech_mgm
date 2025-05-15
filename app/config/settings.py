@@ -18,6 +18,9 @@ SECRET_KEYS = [
     "MARTECH_ALERT_CHANNEL_ID",
     "ROOTUSERNAME",
     "ROOTPASSWORD",
+    "SALES_FORCE_SFTP_HOST",
+    "SALES_FORCE_SFTP_USERNAME",
+    "SALES_FORCE_SFTP_PASSWORD",
 ]
 
 secrets = []
@@ -53,7 +56,11 @@ def fetch_secrets(environment):
 environment_secrets = fetch_secrets(ENVIRONMENT_LOCAL)
 secrets.append(environment_secrets)
 
-
+VOUCHER_MOCK = {
+    "voucher_id": "e5ddcb30-a215-4100-824f-a7814c2469c4",
+    "code": "mgm_mock_app",
+    "end_at": "2025-12-31T23:59:59"
+}
 
 VERSION = "1.0.0"
 

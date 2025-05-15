@@ -6,6 +6,8 @@ import uuid
 
 from app.member_get_member.v2.models.members import MGM_Members
 from app.member_get_member.v2.models.links import MGM_Links
+from app.member_get_member.v2.models.vouchers import MGM_vouchers
+from app.member_get_member.v2.schema.vouchers import VoucherBase
 from app.member_get_member.v2.exeptions.exceptions import MemberGetMemberException
 from app.member_get_member.v2.schema.member import (
     MemberLinkResponse,
@@ -15,7 +17,7 @@ from app.member_get_member.v2.crud.links import get_link_schema_by_member_id
 from app.src.database import crud
 
 
-async def get_promoter_link_id_by_promoter_id(promoter_id:uuid.UUID,session:AsyncSession,request:Request)->MGM_Members:
+async def get_promoter_link_id_by_promoter_id(promoter_id:uuid.UUID,session:AsyncSession,request:Request)->uuid.UUID:
     promoter_link = await crud.search_value(
         model=MGM_Links,
         value=promoter_id,
@@ -30,6 +32,24 @@ async def get_promoter_link_id_by_promoter_id(promoter_id:uuid.UUID,session:Asyn
         )
     return promoter_link[0].id
 
+async def get_vouchers_by_member_id(value:str, column_name:str, session:AsyncSession, request:Request):
+    member = await crud.search_value(model=MGM_Members, value=value, column_name=column_name, session=session)
+    if not member:
+        MemberGetMemberException(
+            request=request,
+            message="Member not found",
+            status_code=404
+        )   
+    member_id = member[0].id
+    vouchers = await crud.search_value(model=MGM_vouchers, value=member_id, column_name="member_id", session=session)
+    if not vouchers:
+        MemberGetMemberException(
+            request=request,
+            message="Vouchers not found",
+            status_code=404
+        )
+    response = [VoucherBase(voucher_id=x.voucher_id,code=x.code,campaign_name=x.campaign_name,end_at=x.end_at).to_base64() for x in vouchers]
+    return response
 
 async def get_member(value:str,column_name:str,session:AsyncSession,request:Request)->MGM_Members:
     mgm_member = await crud.search_value(
