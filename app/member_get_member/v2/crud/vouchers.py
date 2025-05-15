@@ -38,6 +38,7 @@ async def set_voucher(member: MembersResponse, session: AsyncSession,is_promoter
         voucher_invited = MGM_vouchers(
             voucher_id=voucher.voucher_id,
             code=voucher.code,
+            campaign_name=voucher.campaign_name,
             end_at=voucher.end_at,
             member_id=member.id
         )

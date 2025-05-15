@@ -11,7 +11,9 @@ from app.member_get_member.v2.schema.member import (
     CreateBase,
     MembersResponse
     )
-from app.member_get_member.v2.models.vouchers import MGM_vouchers
+from app.src.database import crud
+from app.member_get_member.v2.models.members import MGM_Members
+from app.member_get_member.v2.schema.vouchers import VoucherBase
 from app.member_get_member.v2.exeptions.exceptions import MemberAlreadyExists, MemberGetMemberException
 
 
@@ -75,15 +77,29 @@ async def create_promoter(
 
 
 @router.get(
-    "/member/vouchers/{email}",
-    response_model=List[MGM_vouchers],
+    "/member/vouchers/email/{email}",
+    response_model=List[VoucherBase],
     tags=[f"{tag_prefix} information by"],
     **router_configs
 )
-async def get_vouchers_by_member_email(
+async def get_vouchers_by_email(
     email : str,
     request: Request,
     session: AsyncSession = Depends(get_session)
 ):
-    vouchers = await get_vouchers_by_member_id(email=email, session=session, request=request)
+    vouchers = await get_vouchers_by_member_id(value=email,column_name='email', session=session, request=request)
+    return vouchers
+
+@router.get(
+    "/member/vouchers/user_id/{user_id}",
+    response_model=List[VoucherBase],
+    tags=[f"{tag_prefix} information by"],
+    **router_configs
+)
+async def get_vouchers_by_user_id(
+    user_id : str,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    vouchers = await get_vouchers_by_member_id(value=user_id,column_name='user_id', session=session, request=request)
     return vouchers

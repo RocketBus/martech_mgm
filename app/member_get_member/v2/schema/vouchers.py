@@ -25,6 +25,7 @@ def set_end_at():
 class VoucherBase(SQLModel):
     voucher_id: str
     code: str
+    campaign_name: str = Field(default="MGM_INDICADO")
     end_at: str
 
     def to_base64(self):
