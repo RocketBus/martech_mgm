@@ -28,11 +28,16 @@ async def set_voucher(member: MembersResponse, session: AsyncSession,is_promoter
         # Cria uma nova instância de voucher com os dados do membro (não é promotor)
         voucher = Voucher()
         
-        if ENVIRONMENT_LOCAL == 'prod':
-            voucher.create(
-                is_promoter=is_promoter,
-                email=member.email
-            )
+        # if ENVIRONMENT_LOCAL == 'prod':
+        #     voucher.create(
+        #         is_promoter=is_promoter,
+        #         email=member.email
+        #     )
+        
+        voucher.create(
+            is_promoter=is_promoter,
+            email=member.email
+        )
         
         # Cria o modelo de banco de dados associando o voucher ao membro
         voucher_invited = MGM_vouchers(
@@ -40,7 +45,8 @@ async def set_voucher(member: MembersResponse, session: AsyncSession,is_promoter
             code=voucher.code,
             campaign_name=voucher.campaign_name,
             end_at=voucher.end_at,
-            member_id=member.id
+            member_id=member.id,
+            discount_id=voucher.discount_id
         )
         session.add(voucher_invited)
         await session.flush()  # Garante que o ID e outros valores sejam atualizados
@@ -48,7 +54,9 @@ async def set_voucher(member: MembersResponse, session: AsyncSession,is_promoter
         return VoucherBase(
             voucher_id=voucher_invited.voucher_id,
             code=voucher_invited.code,
-            end_at=voucher_invited.end_at
+            end_at=voucher_invited.end_at,
+            discount_id=voucher_invited.discount_id,
+            campaign_name=voucher_invited.campaign_name
         )
 
     except Exception as e:
