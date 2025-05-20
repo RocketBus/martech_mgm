@@ -24,17 +24,31 @@ def set_end_at():
     
 class VoucherBase(SQLModel):
     voucher_id: str
+    discount_id : str
     code: str
     campaign_name: str = Field(default="MGM_INDICADO")
     end_at: str
 
     def to_base64(self):
         """Retorna uma nova instância com os campos codificados em base64."""
-        return self.__class__(
+        return  VoucherBase(
             voucher_id=encode_base64(self.voucher_id),
+            discount_id=encode_base64(self.discount_id),
             code=encode_base64(self.code),
+            campaign_name=self.campaign_name,
             end_at=self.end_at
         )
+    
+class DiscountBase(SQLModel):
+    fixedValue: bool
+    minPurchaseValue: float
+    maxDiscountValue: float
+    value: float
+
+class VoucherBaseResponse(SQLModel):
+    voucher: VoucherBase
+    discount: DiscountBase
+    
 
 class VoucherEmail(SQLModel):
     email : str
@@ -57,6 +71,32 @@ class Voucher(SQLModel):
     email: List[VoucherEmail] = Field(default_factory=list)
 
 
+    def _create_voucher(self):
+        voucher = VoucherMicroservice()
+        status_code,response = voucher.create_voucher(
+            payload=self.dict()
+        )
+        if status_code != 201:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=response['error']
+            )
+        return response
+
+    
+    def _get_voucher(self,voucher_id:str = None):
+        if voucher_id is None:
+            voucher_id = self.voucher_id
+        ms = VoucherMicroservice()
+        status,response = ms.get_voucher_by_id(voucher_id=self.voucher_id)
+        if status != 200:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=response['error']
+            )
+        return response
+   
+        
     def create(self,is_promoter:bool,email:str) ->VoucherBase:
         if is_promoter:
             self.campaign_name = environment_secrets['MGM_VOUCHER_CAMPAIGN_PROMOTOR']
@@ -71,20 +111,13 @@ class Voucher(SQLModel):
             quantity=1
         ))
         
-        voucher = VoucherMicroservice()
-        status_code,response = voucher.create_voucher(
-            payload=self.dict()
-        )
-        
-        if status_code != 201:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=response['error']
-            )
+        response = self._create_voucher()
         
         self.voucher_id = response['id']
         return VoucherBase(
             voucher_id=self.voucher_id,
+            discount_id=self.discount_id,
+            campaign_name=self.campaign_name,
             code=self.code,
             end_at=self.end_at
         )

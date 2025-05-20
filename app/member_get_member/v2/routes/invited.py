@@ -4,16 +4,17 @@ from sqlalchemy.exc import IntegrityError
 import uuid
 from app.database.db import get_session
 from app.auth.auth_bearer import JWTBearer
-from app.member_get_member.v2.schema.member import CreateBase, InvitedResponse, VoucherBase
+from app.member_get_member.v2.schema.member import CreateBase, InvitedResponse, MembersResponse,MemberLinkResponse
+from app.member_get_member.v2.models.members import MGM_Members
 from app.member_get_member.v2.schema.invitations import CreateStages
 from app.member_get_member.v2.models.invitations import MGM_Invitations
-from app.member_get_member.v2.models.links import MGM_Links
 from app.member_get_member.v2.crud.members import set_member
 from app.member_get_member.v2.crud.vouchers import set_voucher
 from app.member_get_member.v2.crud.invitations import set_stage
 from app.member_get_member.v2.crud.promoter import get_promoter_link_id_by_promoter_id
 from app.member_get_member.v2.exeptions.exceptions import MemberAlreadyExists, MemberGetMemberException
-from app.config.settings import ENVIRONMENT_LOCAL,VOUCHER_MOCK
+from app.src.database.crud import update_field
+from app.member_get_member.v2.crud.links import get_link_schema_by_member_id
 
 # Criação do roteador da API
 router = APIRouter()
@@ -167,6 +168,57 @@ async def tracking(
         )
 
         return response
+    
+    except Exception as e:
+        raise MemberGetMemberException(
+            request=request,
+            message=str(e)
+        )
+
+@router.patch(
+    "/invited/{invited_id}",
+    response_model=MembersResponse,
+    tags=[f"{tag_prefix} create"],
+    **router_configs
+)
+async def invited_to_promoter(
+    invited_id: uuid.UUID,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    # Converte um convidado em promotor.
+
+    ## Essa rota é utilizada para promover um usuário convidado assim que ele finaliza uma compra realizada por meio do link que acessou.
+
+    A API recebe apenas o `invited_id` e atualiza o campo `is_promoter` de `False` para `True`. Em seguida, retorna o schema completo do member,
+    incluindo todas as informações atualizadas do novo promotor.
+    """
+    try:
+        async with session.begin():
+            updated = await update_field(
+                model=MGM_Members,
+                where_column="id",
+                where_value=invited_id,
+                column_name_to_update="is_promoter",
+                new_value=True,
+                session=session
+            )
+            
+            link_schema = await get_link_schema_by_member_id(updated.id,session)
+            if not link_schema:
+                MemberGetMemberException(request=request, message="Link not found",notify_slack=False)
+            
+            link_response = MemberLinkResponse(
+                link_id=link_schema[0].id,
+                link=link_schema[0].url
+            )
+            response = MembersResponse(
+            **updated.dict(),
+            link=link_response
+            )
+            
+            return response
     
     except Exception as e:
         raise MemberGetMemberException(

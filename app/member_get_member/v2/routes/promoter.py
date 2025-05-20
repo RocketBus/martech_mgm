@@ -81,7 +81,7 @@ async def create_promoter(
 
 @router.get(
     "/member/vouchers/email/{email}",
-    response_model=List[VoucherBase],
+    # response_model=List[VoucherBase],
     tags=[f"{tag_prefix} information by"],
     **router_configs
 )
@@ -92,6 +92,7 @@ async def get_vouchers_by_email(
 ):
     vouchers = await get_vouchers_by_member_id(value=email,column_name='email', session=session, request=request)
     return vouchers
+
 
 @router.get(
     "/member/vouchers/user_id/{user_id}",

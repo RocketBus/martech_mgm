@@ -35,7 +35,7 @@ def fetch_secrets(environment):
   
     elif environment == 'prod':
         secret_manager = SecretManager()
-        aws_arn = "arn:aws:secretsmanager:us-east-1:596612927501:secret:Secrets_MartechHub-sqcs3E"
+        aws_arn = "arn:aws:secretsmanager:us-east-1:596612927501:secret:Secrets_MartechMGM-baEURB"
         k8s_env = os.environ.get("ENVIRONMENT")
         response = {key: secret_manager.get_secret_by_secret_key(arn=aws_arn, secret_key=key) for key in SECRET_KEYS}
     
