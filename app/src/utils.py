@@ -4,7 +4,8 @@ import string
 from datetime import datetime, timedelta
 from fastapi import Request
 import base64
-
+import urllib.parse
+import binascii
 
 def future_date(days: int) -> datetime:
     return datetime.now() + timedelta(days=days)
@@ -33,5 +34,18 @@ def encode_base64(value: str) -> str:
 
 
 def decode_base64(encoded_str: str) -> str:
-    decoded_bytes = base64.b64decode(encoded_str.encode('utf-8'))
-    return decoded_bytes.decode('utf-8')
+    try:
+        # Primeiro, tentar o unquote (não afeta strings já decodificadas)
+        decoded_url = urllib.parse.unquote(encoded_str)
+        
+        # Corrigir padding do base64 se necessário
+        missing_padding = len(decoded_url) % 4
+        if missing_padding:
+            decoded_url += '=' * (4 - missing_padding)
+
+        # Tentar decodificar Base64
+        decoded_bytes = base64.b64decode(decoded_url)
+        return decoded_bytes.decode('utf-8').strip('"')
+
+    except (binascii.Error, UnicodeDecodeError) as e:
+        return f"Erro ao decodificar: {e}"

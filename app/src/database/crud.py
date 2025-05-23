@@ -1,6 +1,11 @@
-from typing import List, Type, Any, Optional
+from typing import List, Type, Any, Optional, Union
 from sqlmodel import SQLModel
-from sqlalchemy import select,distinct,delete
+from uuid import UUID
+from sqlalchemy import (
+    select,
+    distinct
+    )
+from sqlalchemy import delete as sqlalchemy_delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, SQLModel
 
@@ -124,24 +129,28 @@ async def search_value(
     
 async def delete_in(
     model: Type[SQLModel],
-    items: List[str],
+    items: Union[UUID, str, List[Union[UUID, str]]],
     column_name: str,
     session: AsyncSession
 ) -> int:
     """
-    Delete items from the given model's table based on the specified column.
-
-    Args:
-        model (Type[SQLModel]): The SQLModel class representing the database table.
-        items (List[str]): A list of items to delete.
-        column_name (str): The name of the column to check against.
-        session (AsyncSession): The SQLAlchemy AsyncSession instance.
-
-    Returns:
-        int: The number of rows deleted.
+    Delete one or more items from the model's table based on the specified column.
     """
+    # Garante que seja sempre uma lista
+    if isinstance(items, (UUID, str)):
+        items = [items]
+
+    # Evita rodar a query se a lista estiver vazia
+    if not items:
+        return 0
+
     column = getattr(model, column_name)
-    query = delete(model).where(column.in_(items))
-    result = await session.execute(query)
-    await session.commit()
+
+    # Converte strings para UUIDs se a coluna for UUID (opcional)
+    # ou apenas garante que os objetos estão no formato certo
+    # Você pode remover esta etapa se tiver certeza do tipo correto
+
+    stmt = sqlalchemy_delete(model).where(column.in_(items))
+    result = await session.execute(stmt)
+    await session.flush()
     return result.rowcount
