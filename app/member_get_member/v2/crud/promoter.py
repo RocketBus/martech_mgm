@@ -5,8 +5,11 @@ from sqlmodel import select, and_, update
 import uuid
 
 from app.member_get_member.v2.models.members import MGM_Members
-from app.member_get_member.v2.models.links import MGM_Links
+from app.member_get_member.v2.models.links import MGM_Links,MGM_ClickTracking
 from app.member_get_member.v2.models.vouchers import MGM_vouchers
+from app.member_get_member.v2.models.invitations import MGM_Invitations
+from app.member_get_member.v2.models.vouchers import MGM_vouchers
+from app.member_get_member.v2.models.purchase import MGM_Purchases
 from app.member_get_member.v2.schema.vouchers import VoucherBase,Voucher,VoucherBaseResponse,DiscountBase
 from app.member_get_member.v2.exeptions.exceptions import MemberGetMemberException
 from app.member_get_member.v2.schema.member import (
@@ -16,6 +19,70 @@ from app.member_get_member.v2.schema.member import (
 from app.member_get_member.v2.crud.links import get_link_schema_by_member_id
 from app.src.database import crud
 from app.config.settings import environment_secrets,ENVIRONMENT_LOCAL
+
+
+async def delete_member(email:str,session:AsyncSession,request:Request):
+    member = await crud.search_value(
+        model=MGM_Members,
+        value=email,
+        column_name="email",
+        session=session
+    )
+    if not member:
+        MemberGetMemberException(
+            request=request,
+            message="Promoter_id not found",
+            status_code=404
+        )
+    member_id = member[0].id
+    promoter_link_id = await get_promoter_link_id_by_promoter_id(
+        promoter_id=member_id,
+        session=session,
+        request=request
+    )
+    
+    await crud.delete_in(
+        model=MGM_Purchases,
+        items=member_id,
+        column_name="promoter_id",
+        session=session
+    )
+    
+    await crud.delete_in(
+        model=MGM_vouchers,
+        items=member_id,
+        column_name="member_id",
+        session=session
+    )
+    
+    await crud.delete_in(
+        model=MGM_Invitations,
+        items=promoter_link_id,
+        column_name="link_id",
+        session=session
+    )
+    
+    await crud.delete_in(
+        model=MGM_ClickTracking,
+        items=promoter_link_id,
+        column_name="link_id",
+        session=session
+    )
+    
+    await crud.delete_in(
+        model=MGM_Links,
+        items=member_id,
+        column_name="member_id",
+        session=session
+    )
+    
+    await crud.delete_in(
+        model=MGM_Members,
+        items=member_id,
+        column_name="id",
+        session=session
+    )
+    return member
 
 
 async def get_promoter_link_id_by_promoter_id(promoter_id:uuid.UUID,session:AsyncSession,request:Request)->uuid.UUID:
@@ -32,6 +99,7 @@ async def get_promoter_link_id_by_promoter_id(promoter_id:uuid.UUID,session:Asyn
             status_code=404
         )
     return promoter_link[0].id
+
 
 async def get_vouchers_by_member_id(value:str, column_name:str, session:AsyncSession, request:Request):
     member = await crud.search_value(model=MGM_Members, value=value, column_name=column_name, session=session)
@@ -78,6 +146,7 @@ async def get_vouchers_by_member_id(value:str, column_name:str, session:AsyncSes
             )
         )
     return response
+
 
 async def get_member(value:str,column_name:str,session:AsyncSession,request:Request)->MGM_Members:
     mgm_member = await crud.search_value(

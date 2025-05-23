@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from typing import List
@@ -6,7 +6,7 @@ from app.database.db import get_session
 
 from app.auth.auth_bearer import JWTBearer
 from app.member_get_member.v2.crud.members import set_member
-from app.member_get_member.v2.crud.promoter import get_vouchers_by_member_id
+from app.member_get_member.v2.crud.promoter import get_vouchers_by_member_id,delete_member
 from app.member_get_member.v2.schema.member import (
     CreateBase,
     MembersResponse
@@ -46,6 +46,8 @@ async def create_promoter(
     - Valida autenticação via JWTBearer.
     - Cria o member como promotor, salvando os dados no banco de forma transacional.
     - Retorna a resposta codificada em base64 com os dados do member.
+    
+    o campo de email no payload precisa estar em `base64`
 
     Args:
         member (CreateBase): Dados recebidos no corpo da requisição.
@@ -65,6 +67,7 @@ async def create_promoter(
             member_email = member.email
             decode_email = decode_base64(member_email)
             member.email = decode_email
+            # raise
             response = await set_member(member=member, is_promoter=True, session=session)
 
         # Retorna a resposta formatada (codificada em base64)
@@ -78,6 +81,25 @@ async def create_promoter(
         # Trata exceções genéricas, com logging e rastreamento
         MemberGetMemberException(request=request, message=str(e))
 
+@router.delete(
+    "/promoter/delete/{email}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=[f"{tag_prefix} delete"],
+    **router_configs
+)
+async def delete_member_by_email(
+    email: str,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    try:
+        async with session.begin():
+            await delete_member(email=email, session=session, request=request)
+
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    except Exception as e:
+        raise MemberGetMemberException(request=request, message=str(e))
 
 @router.get(
     "/member/vouchers/email/{email}",
