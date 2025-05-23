@@ -25,5 +25,5 @@ class MGM_Links(SQLModel, table=True):
 
     @classmethod
     def create_with_url(cls, member_id: uuid.UUID) -> "MGM_Links":
-        url = f"https://www.clickbus.com.br?utm_source=automatic&utm_medium=crm&utm_campaign=member-get-member-convidado&utm_term=invited&utm_content={member_id}&responsive=true"
+        url = f"https://www.clickbus.com.br?utm_source=automatic&utm_medium=crm&utm_campaign=member-get-member-convidado&utm_term=invited&utm_content={member_id}"
         return cls(member_id=member_id, url=url)

@@ -2,7 +2,7 @@ import os
 from app.src.aws.secrete_manager import SecretManager
 
 
-ENVIRONMENT_LOCAL = 'dev' # alterar p/ prod quado fizer commit
+ENVIRONMENT_LOCAL = 'prod' # alterar p/ prod quado fizer commit
 
 SECRET_KEYS = [
     "JWT_SECRET",
