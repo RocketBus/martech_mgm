@@ -82,7 +82,7 @@ async def create_promoter(
         MemberGetMemberException(request=request, message=str(e))
 
 @router.delete(
-    "/promoter/delete/{email}",
+    "/member/delete/{email}",
     status_code=status.HTTP_204_NO_CONTENT,
     tags=[f"{tag_prefix} delete"],
     **router_configs
