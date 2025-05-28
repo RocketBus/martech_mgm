@@ -28,16 +28,11 @@ async def set_voucher(member: MembersResponse, session: AsyncSession,is_promoter
         # Cria uma nova instância de voucher com os dados do membro (não é promotor)
         voucher = Voucher()
         
-        # if ENVIRONMENT_LOCAL == 'prod':
-        #     voucher.create(
-        #         is_promoter=is_promoter,
-        #         email=member.email
-        #     )
-        
-        voucher.create(
-            is_promoter=is_promoter,
-            email=member.email
-        )
+        if ENVIRONMENT_LOCAL == 'prod':
+            voucher.create(
+                is_promoter=is_promoter,
+                email=member.email
+            )
         
         # Cria o modelo de banco de dados associando o voucher ao membro
         voucher_invited = MGM_vouchers(
