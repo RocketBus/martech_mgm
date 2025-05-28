@@ -6,10 +6,12 @@ from app.member_get_member.v2.schema.vouchers import VoucherBase
 from app.src.utils import encode_base64
 
 class InputType(str, Enum):
+    PROMOTER_APP = "promoter app"
+    PROMOTER_WEB = "promoter web"
+    INVITED_APP = "invited app"
+    INVITED_WEB = "invited web"
     INNER_BASE = 'inner base'
     MANUALLY = 'manually'
-    INVITED = "invited"
-    PROMOTER = "promoter"
 
 
 class CreateBase(SQLModel):
